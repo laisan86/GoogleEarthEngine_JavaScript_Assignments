@@ -1,0 +1,31 @@
+
+//先用ROI把所要的範圍匡出來
+//範例地點：台東成功鎮(Google Map的座標要左右顛倒)
+var roi = ee.Geometry.Point([121.0487168, 23.1058638]);
+
+//透過Landsat 9抓取圖資
+var image = ee.ImageCollection("LANDSAT/LC09/C02/T1_L2")
+            .filterDate('2023-1-1', '2024-6-30')
+            .filterBounds(roi)
+            .sort("CLOUD_COVER")
+            .first(); //實驗的關係，只抓第一張
+
+print(image); //資料中會有個id就是要顯示的圖
+              //每張圖含有特有的id
+
+//由於衛星是透過不同頻段不斷接收地表反射的(如：不同顏色的光)等電磁波，
+//因此會有很多頻段(Band)，所以要一層層(Layer)去套疊
+// ~ 把回波當成一層層不同顏色的玻璃紙去套疊
+Map.addLayer(image, {
+                    bands: ["SR_B4", "SR_B3", "SR_B2"],
+                    min: 0,
+                    max: 20000
+                    }, "True Color (432)");
+Map.addLayer(image, {
+                    bands: ["SR_B5", "SR_B4", "SR_B3"],
+                    min: 0,
+                    max: 20000
+                    }, "False Color (432)");  //SR_B5跟近紅外線有關
+
+//Map疊好以後，其實就是加工輸出圖像了
+Map.centerObject(image, 8); //置中又放大8倍
