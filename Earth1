@@ -1,0 +1,29 @@
+
+var myString = "How are you?";
+print(myString);
+
+var number = 94;
+print("The number is:", number);
+
+var listofNumbers = [1, 3, 5, 7, 9];
+print("List of numbers: ", listofNumbers);
+
+var listofStrings = ['San Francisco', 'New York', 'Paris', 'London'];
+print("List of cities:", listofStrings);
+
+var myObject = {
+  Country: 'Ethiopia',
+  Contient: 'Africa',
+  Cities: ["Addis Ababa", "Dire Dawa", "Adama", "Bahir Dar"]
+};
+print("Dictionary:", myObject);
+
+print('Country:', myObject["Country"]);
+
+print("Cities:", myObject.Cities);
+
+var reflect = function(element){
+  return element;
+};
+
+print("How is your day?", reflect('Great! How about you?'));
