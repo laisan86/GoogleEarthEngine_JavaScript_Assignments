@@ -1,0 +1,16 @@
+
+//從世界銀行的開放資料，下載各國的邊界Shapes
+// https://datacatalog.worldbank.org/search/dataset/0038272/World-Bank-Official-Boundaries
+// Very high definition那個ZIP，但要去掉 *.sbx
+// 用Assets去上傳給Google Earth Engine
+
+//透過Table ID以FeatureCollection載入Shape定義
+var roi = ee.FeatureCollection("projects/ee-laisanlandsat8/assets/WB_countries_Admin0_10m");
+print(roi.limit(10));
+
+Map.addLayer(roi, {}, "World Countries");
+
+//可以只用國家名稱自動把Shape標出來
+var Timor = roi.filter(ee.Filter.eq('NAME_EN', 'East Timor'));
+Map.addLayer(Timor, {color: "Yellow"}, "Timor-Leste");
+Map.centerObject(Timor, 8);
