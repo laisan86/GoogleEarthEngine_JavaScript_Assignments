@@ -1,0 +1,39 @@
+
+//先用ROI把所要的範圍匡出來
+//範例地點：台東成功鎮(Google Map的座標要左右顛倒)
+var roi = ee.Geometry.Point([121.0487168, 23.1058638]);
+
+//由於衛星的感測器(每個Band)都獲取到類比信號，但處理與精簡上
+//適合整數，所以會有Scale跟Offset兩項 ~ y = scale * x + offset
+//線性迴歸那些感測值
+var applyScaleFactors = function(image) {
+  
+  // select 裡面可以用 Type 3 的表示式
+  var opticalBands = image.select("SR_B.").multiply(2.75e-05).add(-0.2);
+  var thermalBands = image.select("ST_B.*").multiply(0.00341802).add(149);
+
+  //把兩個處理後的新band再疊進來
+  return image.addBands(opticalBands, null, true).addBands(thermalBands, null, true);
+}
+
+//載入Landsat 9的影像集
+var image = ee.ImageCollection("LANDSAT/LC09/C02/T1_L2")
+              .filterBounds(roi)
+              .filterDate('2024-1-1', '2024-6-30')
+              .map(applyScaleFactors);    //對所有影像都套用同樣函數處理
+
+//顯現衛星圖
+var visualization = {
+  bands: ["SR_B4", "SR_B3", "SR_B2"],   //RGB
+  min: 0,                 //已經有Scale跟Offset了，不必寫整數
+  max: 0.3
+}
+
+//疊起來
+Map.addLayer(image, visualization, "True Color (432)");
+
+//K band，表面溫度
+Map.addLayer(image, {bands: ["ST_B10"], min: 0, max: 0.3}, "Thermal");
+
+//Map疊好以後，其實就是加工輸出圖像了
+Map.centerObject(image, 8); //置中又放大8倍
