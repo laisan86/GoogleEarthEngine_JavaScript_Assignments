@@ -1,0 +1,27 @@
+
+/*
+  用Landsat 8的影像，透過演算法自動去除雲，看淨源茶廠的影像
+*/
+
+//淨源茶廠的GPS座標
+var roi = ee.Geometry.Point([121.7028726, 24.9307223]);
+
+//取得Raw Image
+var l8raw = ee.ImageCollection("LANDSAT/LC08/C02/T1");
+
+//有雲的
+var cloudImage = l8raw.filterDate('2024-1-1', '2024-6-30').filterBounds(roi);
+
+//透過演算法把雲去掉
+var cloudFree = ee.Algorithms.Landsat.simpleComposite({
+  collection: cloudImage,
+  asFloat: true
+});
+
+//定義顯示的參數
+var cloudVis = {bands: ['B4', 'B3', 'B2'], min: 0, max: 30000};
+var noCloud = {bands: ['B4', 'B3', 'B2'], min: 0, max: 0.5};
+
+Map.addLayer(cloudImage, cloudVis, '有雲的');
+Map.addLayer(cloudFree, noCloud, '演算法去掉雲');
+Map.centerObject(roi, 7);
