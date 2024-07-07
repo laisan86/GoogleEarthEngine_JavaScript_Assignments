@@ -1,0 +1,16 @@
+
+//可以不用自己標示，用整個衛星已經定義好GIS的座標與邊界
+//即FeatureCollection去組成ROI ~ 人家已經畫出ROI做地理調查
+
+var countries = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017");
+var roi = countries.filter(ee.Filter.eq("country_na", "Taiwan"));
+print(roi);
+
+//隨機建立ROI範圍中50個點樣本
+var randomPoints = ee.FeatureCollection.randomPoints(roi, 50);
+print(randomPoints);
+
+var colorSamples = {'color': 'red'};
+Map.addLayer(randomPoints, colorSamples, "Samples");
+Map.addLayer(roi, {}, "Taiwan");
+Map.centerObject(roi, 6);
