@@ -1,0 +1,44 @@
+var geometry = 
+    /* color: #d63000 */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[121.17282229043572, 22.825033324541202],
+          [121.17282229043572, 22.821394233874987],
+          [121.17730694390862, 22.821394233874987],
+          [121.17730694390862, 22.825033324541202]]], null, false);
+
+//先建立要看的區域(Region of Interest, ROI)
+var roi = geometry;
+
+var applyScaleFactors = function(image) {
+  var opticalBands = image.select("SR_B.").multiply(2.75e-05).add(-0.2);
+  var thermalBands = image.select("ST_B.*").multiply(0.00341802).add(149);
+
+  return image.addBands(opticalBands, null, true).addBands(thermalBands, null, true);
+}
+
+var l9 = ee.ImageCollection("LANDSAT/LC09/C02/T1_L2")
+.map(applyScaleFactors);
+
+//設定雲層覆蓋低於20%為條件
+var filtered = l9.filterMetadata('CLOUD_COVER', 'less_than', 20)
+                 .filter(ee.Filter.date('2024-1-1', '2024-6-30'))
+                 .filter(ee.Filter.bounds(roi));
+
+print("共含：", filtered.size()); //為了實驗，只出一張
+
+//顯現衛星圖
+var visualization = {
+  bands: ["SR_B4", "SR_B3", "SR_B2"],   //RGB
+  min: 0,                 //已經有Scale跟Offset了，不必寫整數
+  max: 0.5
+}
+
+Map.addLayer(filtered, visualization, "True Color (432)");
+
+//Map疊好以後，其實就是加工輸出圖像了
+Map.centerObject(filtered, 8); //置中又放大8倍
