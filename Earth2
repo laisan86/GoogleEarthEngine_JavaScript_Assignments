@@ -1,0 +1,46 @@
+
+var testString = "My first string example.";
+var eeString = ee.String(testString);
+print("This:", eeString);
+
+var myString = ee.String("This is on the earth engine server.");
+print("String on the server:", myString);
+
+var myList = [1,2,3,4,5];
+var eeList = ee.List(myList);
+print(eeList);
+
+var sequence = ee.List.sequence(1,5);
+print(sequence);
+
+var value = sequence.get(0);
+print(value);
+
+var value = sequence.get(3);
+print(value);
+
+var date = ee.Date("2024-07-03");
+print(date);
+
+var aDate = ee.Date.fromYMD(2024,8,13);
+print(aDate);
+
+var testDate = ee.Date.fromYMD({
+  day: 16,
+  month: 8,
+  year: 2024
+});
+print(testDate);
+
+var testDate = ee.Date('2024-8-18');
+var futureDate = testDate.advance(1, 'month');
+print(futureDate);
+
+var data = {
+  city: "Addis Ababa",
+  population: 9000000,
+  elevation: 2500
+};
+var eeData = ee.Dictionary(data);
+print(data.city);
+print(eeData.get('city'));
