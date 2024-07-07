@@ -1,0 +1,39 @@
+var roi = 
+    /* color: #60d63a */
+    /* shown: false */
+    ee.Geometry.Polygon(
+        [[[120.49284979310356, 23.53780982087274],
+          [120.45920416322075, 23.588790595144953],
+          [120.43654486146293, 23.586902771201995],
+          [120.40427252259575, 23.558582153955346],
+          [120.44478460755668, 23.51136756113339]]]);
+
+//載入法國哨兵二號表面回波圖
+var dataset = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+.filterBounds(roi)
+.filterMetadata("CLOUD_COVERAGE_ASSESSMENT", "LESS_THAN", 20)
+.filterDate('2024-1-1', '2024-6-30')
+.select(['B4', 'B3', 'B2'])
+.median();  //自動求所有圖片的中位數合成一張
+
+var rescale = dataset.divide(10000);  //把圖縮小
+
+var clipImage = rescale.clip(roi);
+
+var params = {
+  bands: ['B4', 'B3', 'B2'],
+  min: 0,
+  max: 0.4
+};
+
+Map.addLayer(rescale, params, '哨兵二號的縮小原圖');
+Map.addLayer(clipImage, params, '民雄');
+Map.centerObject(roi, 12);  //把民雄位置固定在中間
+
+//把民雄的衛星空拍圖根據ROI切下來存成TIFF
+Export.image.toDrive({
+  image: clipImage.visualize(params), //如果是原圖的話可以沒參數
+  description: 'Sentienl2_MingShoung',
+  scale: 10,  //解析度：每個像素是10m
+  region: roi
+});
