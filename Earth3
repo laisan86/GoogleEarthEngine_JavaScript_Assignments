@@ -1,0 +1,30 @@
+
+//建議事項：
+//1. 先將所有有關的資料都以JavaScript寫在Client的部分
+//2. Client的部分處理好後，才決定丟給JavaScript寫的Server ~ 有ee的那種
+//3. 一但可以抓就趕緊全部抓，抓完再用Client端的程序分類處理
+//4. 抓到沒了趕進斷線，衛星的綜合資料庫才不會強行被佔據，否則會被強行切斷
+
+//這在Client
+var data = '2024-1-1';
+print(typeof(data));
+
+//這樣才在Server
+var eeDate = ee.Date(data);
+print(typeof(eeDate));
+
+//透過哨兵二號取得影像
+var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED');
+var filtered = s2.filter(ee.Filter.date("2023-1-1", "2024-6-30"));
+
+//由於衛星影像通常都很大又多，不可以直接用迴圈等，要不然整個編輯器會當掉
+//一定要用Callback函數的方法，讓主機可以分批抽空去處理(多工作業系統，在背景執行啦！)
+var myCallback = function(object) {
+  print(object);
+};
+print("總共衛星圖資：");
+var numImages = filtered.size().evaluate(myCallback); //用Callback函數去等著主機回音
+                                                      //尤其不能用getInfo()，死更快！！
+                                                      //都用evaluate()，等主機做完再回應
+                                                      
+//這個答案假如是這個時間區間，可能高達幾百萬張！！因為法國哥白尼系統可以拍攝全世界
